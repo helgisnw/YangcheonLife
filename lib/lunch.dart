@@ -9,7 +9,7 @@ class LunchTab extends StatelessWidget {
       navigationBar: null,
       child: SafeArea(
         child: WebView(
-          initialUrl: 'https://lunch.dkqq.me',
+          initialUrl: 'https://meal.dkqq.me',
           javascriptMode: JavascriptMode.unrestricted,
         ),
       ),

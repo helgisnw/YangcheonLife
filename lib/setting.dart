@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class SettingsTab extends StatefulWidget {
   @override
@@ -52,6 +53,21 @@ class _SettingsTabState extends State<SettingsTab> {
         ),
       ),
     );
+  }
+  void subscribeToTopic(int a, int b) {
+    FirebaseMessaging.instance.subscribeToTopic('${a}-${b}').then((_) {
+      print('Subscription to "${a}-${b}" topic successful!');
+    }).catchError((error) {
+      print('Subscription to "${a}-${b}" topic failed: $error');
+    });
+  }
+
+  void unsubscribeFromTopic(int a, int b) {
+    FirebaseMessaging.instance.unsubscribeFromTopic('${a}-${b}').then((_) {
+      print('Unsubscription from "${a}-${b}" topic successful!');
+    }).catchError((error) {
+      print('Unsubscription from "${a}-${b}" topic failed: $error');
+    });
   }
 
   void showClassAndGradeDialog() {
@@ -117,8 +133,10 @@ class _SettingsTabState extends State<SettingsTab> {
               onPressed: () {
                 setState(() {
                   // Update the state of your main settings when saved
+                  unsubscribeFromTopic(defaultGrade, defaultClass);
                   defaultGrade = tempGrade;
                   defaultClass = tempClass;
+                  subscribeToTopic(defaultGrade, defaultClass);
                 });
                 savePreferences();
                 Navigator.of(context).pop();
@@ -130,3 +148,4 @@ class _SettingsTabState extends State<SettingsTab> {
     );
   }
 }
+
