@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "827951658034",
+    "project_id": "yangcheonlife",
+    "storage_bucket": "yangcheonlife.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:827951658034:android:032bd918a11f14224bf82b",
+        "android_client_info": {
+          "package_name": "com.helgisnw.yangcheonlife"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCvcTaGweEU0PLjhT_GwtkPclHOrD6ALiA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

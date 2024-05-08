@@ -85,6 +85,7 @@ class _TimeTableTabState extends State<TimeTableTab> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        SizedBox(width: 30),  // 왼쪽에 공간을 추가하여 전체 요소를 오른쪽으로 밀어냄
         DropdownButton<int>(
           value: selectedGrade,
           items: gradeItems,
@@ -105,7 +106,7 @@ class _TimeTableTabState extends State<TimeTableTab> {
             }
           },
         ),
-        SizedBox(width: 20),
+        SizedBox(width: 20),  // 드롭다운 메뉴 간 간격
         DropdownButton<int>(
           value: selectedClass,
           items: classItems,
@@ -126,9 +127,19 @@ class _TimeTableTabState extends State<TimeTableTab> {
             }
           },
         ),
+        IconButton(
+          icon: Icon(Icons.refresh),
+          onPressed: () {
+            fetchSchedule(currentGrade, currentClass);
+          },
+        ),
       ],
     );
   }
+
+
+
+
 
   Widget buildGridView() {
     return GridView.count(
