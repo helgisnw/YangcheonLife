@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
 class TimeTableTab extends StatefulWidget {
   @override
@@ -15,8 +16,21 @@ class _TimeTableTabState extends State<TimeTableTab> {
   int defaultClass = 1;
   int currentGrade = 1;
   int currentClass = 1;
-  final List<DropdownMenuItem<int>> gradeItems = List.generate(3, (index) => DropdownMenuItem(value: index + 1, child: Text('${index + 1}학년')));
-  final List<DropdownMenuItem<int>> classItems = List.generate(11, (index) => DropdownMenuItem(value: index + 1, child: Text('${index + 1}반')));
+
+  final List<Map<String, String>> periodTimes = [
+    {"start": "08:20", "end": "09:20"},
+    {"start": "09:20", "end": "10:20"},
+    {"start": "10:20", "end": "11:20"},
+    {"start": "11:20", "end": "14:10"},
+    {"start": "13:10", "end": "14:10"},
+    {"start": "14:10", "end": "15:10"},
+    {"start": "15:10", "end": "16:10"}
+  ];
+
+  final List<DropdownMenuItem<int>> gradeItems = List.generate(3, (index) =>
+      DropdownMenuItem(value: index + 1, child: Text('${index + 1}학년')));
+  final List<DropdownMenuItem<int>> classItems = List.generate(11, (index) =>
+      DropdownMenuItem(value: index + 1, child: Text('${index + 1}반')));
 
   @override
   void initState() {
@@ -51,7 +65,8 @@ class _TimeTableTabState extends State<TimeTableTab> {
         var data = json.decode(response.body);
         setState(() {
           scheduleData = List<List<Map<String, dynamic>>>.from(
-              data.map((i) => List<Map<String, dynamic>>.from(i.map((j) => j as Map<String, dynamic>)))
+              data.map((i) => List<Map<String, dynamic>>.from(
+                  i.map((j) => j as Map<String, dynamic>)))
           );
         });
       } else {
@@ -85,7 +100,7 @@ class _TimeTableTabState extends State<TimeTableTab> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        SizedBox(width: 30),  // 왼쪽에 공간을 추가하여 전체 요소를 오른쪽으로 밀어냄
+        SizedBox(width: 30),
         DropdownButton<int>(
           value: selectedGrade,
           items: gradeItems,
@@ -106,7 +121,7 @@ class _TimeTableTabState extends State<TimeTableTab> {
             }
           },
         ),
-        SizedBox(width: 20),  // 드롭다운 메뉴 간 간격
+        SizedBox(width: 20),
         DropdownButton<int>(
           value: selectedClass,
           items: classItems,
@@ -136,10 +151,6 @@ class _TimeTableTabState extends State<TimeTableTab> {
       ],
     );
   }
-
-
-
-
 
   Widget buildGridView() {
     return GridView.count(
@@ -172,13 +183,21 @@ class _TimeTableTabState extends State<TimeTableTab> {
         ),
       );
     } else if (index % 6 == 0) {
+      int periodIndex = (index / 6).toInt() - 1;
       return Container(
         decoration: cellDecoration,
-        child: Center(
-          child: Text(
-            '${(index / 6).toInt()}교시',
-            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.normal, color: Colors.black),
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              '${periodIndex + 1}교시',
+              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.normal, color: Colors.black),
+            ),
+            Text(
+              '${periodTimes[periodIndex]["start"]}',
+              style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.normal, color: Colors.black),
+            ),
+          ],
         ),
       );
     } else {
@@ -189,12 +208,42 @@ class _TimeTableTabState extends State<TimeTableTab> {
   }
 
   Widget createScheduleCell(int weekday, int classTime, BoxDecoration decoration) {
+    DateTime now = DateTime.now();
+    int todayWeekday = now.weekday - 1; // 월요일: 0, 화요일: 1, ...
+
+    // 각 교시의 시작 및 종료 시간 계산
+    DateFormat format = DateFormat("HH:mm");
+    DateTime? startTime, endTime;
+
+    if (classTime > 0 && classTime <= periodTimes.length) {
+      var period = periodTimes[classTime - 1];
+      startTime = format.parse(period["start"]!);
+      startTime = DateTime(now.year, now.month, now.day, startTime.hour, startTime.minute);
+
+      endTime = format.parse(period["end"]!);
+      endTime = DateTime(now.year, now.month, now.day, endTime.hour, endTime.minute);
+    }
+
+    // 셀 배경색 결정 (현재 시간과 요일을 고려)
+    bool isCurrentClass = weekday == todayWeekday &&
+        startTime != null &&
+        now.isAfter(startTime) &&
+        now.isBefore(endTime!);
+
     var data = scheduleData.isNotEmpty ? scheduleData[weekday].firstWhere(
           (element) => element['classTime'] == classTime,
       orElse: () => {"subject": "", "teacher": ""},
     ) : {"subject": "", "teacher": ""};
+
+    print(data);
+    print(startTime);
+    print(endTime);
+    print(isCurrentClass);
+
     return Container(
-      decoration: decoration,
+      decoration: decoration.copyWith(
+        color: isCurrentClass ? Colors.yellow.shade100 : Colors.transparent,
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[

@@ -10,6 +10,26 @@ import 'notification_service.dart'; // Adjust the path according to your project
 import 'firebase_options.dart'; // Adjust the path according to your project structure if needed
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+final Logger logger = Logger();
+
+/// Function to request permission for notifications
+Future<void> requestNotificationPermission() async {
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  NotificationSettings settings = await messaging.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+    provisional: false,
+  );
+
+  if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+    logger.i('User granted permission');
+  } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
+    logger.i('User granted provisional permission');
+  } else {
+    logger.i('User declined or has not accepted permission');
+  }
+}
 
 void setupMessagingListeners() {
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
@@ -26,6 +46,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await requestNotificationPermission(); // Request permission
   setupMessagingListeners();
 
   NotificationService.initialize(); // Initialize the notification service
