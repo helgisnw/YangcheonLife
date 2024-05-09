@@ -16,21 +16,26 @@ class _TimeTableTabState extends State<TimeTableTab> {
   int defaultClass = 1;
   int currentGrade = 1;
   int currentClass = 1;
+  String selectedSubjectB = "물리";
+  String selectedSubjectC = "화학";
+  String selectedSubjectD = "생명과학";
 
   final List<Map<String, String>> periodTimes = [
     {"start": "08:20", "end": "09:20"},
     {"start": "09:20", "end": "10:20"},
     {"start": "10:20", "end": "11:20"},
-    {"start": "11:20", "end": "14:10"},
+    {"start": "11:20", "end": "12:10"},
     {"start": "13:10", "end": "14:10"},
     {"start": "14:10", "end": "15:10"},
     {"start": "15:10", "end": "16:10"}
   ];
 
-  final List<DropdownMenuItem<int>> gradeItems = List.generate(3, (index) =>
-      DropdownMenuItem(value: index + 1, child: Text('${index + 1}학년')));
-  final List<DropdownMenuItem<int>> classItems = List.generate(11, (index) =>
-      DropdownMenuItem(value: index + 1, child: Text('${index + 1}반')));
+  final List<DropdownMenuItem<int>> gradeItems = List.generate(
+      3,
+          (index) => DropdownMenuItem(value: index + 1, child: Text('${index + 1}학년')));
+  final List<DropdownMenuItem<int>> classItems = List.generate(
+      11,
+          (index) => DropdownMenuItem(value: index + 1, child: Text('${index + 1}반')));
 
   @override
   void initState() {
@@ -47,6 +52,9 @@ class _TimeTableTabState extends State<TimeTableTab> {
       defaultClass = classNumber;
       currentGrade = grade;
       currentClass = classNumber;
+      selectedSubjectB = prefs.getString('selectedSubjectB') ?? "물리";
+      selectedSubjectC = prefs.getString('selectedSubjectC') ?? "화학";
+      selectedSubjectD = prefs.getString('selectedSubjectD') ?? "생명과학";
     });
     fetchSchedule(grade, classNumber);
   }
@@ -235,15 +243,21 @@ class _TimeTableTabState extends State<TimeTableTab> {
       orElse: () => {"subject": "", "teacher": ""},
     ) : {"subject": "", "teacher": ""};
 
-    print(data);
-    print(startTime);
-    print(endTime);
-    print(isCurrentClass);
+    // 탐구 과목 이름을 대체
+    if (data['subject'] == "탐구B") {
+      data['subject'] = selectedSubjectB;
+    } else if (data['subject'] == "탐구C") {
+      data['subject'] = selectedSubjectC;
+    }
+    else if (data['subject'] == "탐구D") {
+      data['subject'] = selectedSubjectD;
+    }
+
 
     return Container(
-      decoration: decoration.copyWith(
+        decoration: decoration.copyWith(
         color: isCurrentClass ? Colors.yellow.shade100 : Colors.transparent,
-      ),
+    ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
